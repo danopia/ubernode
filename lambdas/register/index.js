@@ -3,13 +3,12 @@
 let doc = require('dynamodb-doc');
 let dynamo = new doc.DynamoDB();
 exports.handler = (event, context, callback) => {
-  // existing nodes
+  // one of these
   const nodeId = event['body-json'].nodeId;
-
-  // new nodes
   const inviteId = event['body-json'].inviteId;
 
   const nodeVersion = event['body-json'].nodeVersion;
+  const roles = event['body-json'].roles || [];
 
   // also context (source-ip, stage, user-agent, api-key)
   // also params (header, path, querystring)
@@ -39,6 +38,11 @@ exports.handler = (event, context, callback) => {
       // TODO: use updateItem
       node.lastSeen = new Date().toJSON();
       node.runningVersion = nodeVersion;
+      if (roles.length) {
+        node.roles = dynamo.Set(roles, 'S');
+      } else {
+        delete node.roles;
+      }
       dynamo.putItem({
         TableName: 'Uber_Nodes',
         Item: node,
@@ -53,12 +57,22 @@ exports.handler = (event, context, callback) => {
           ExpressionAttributeValues: {
             ':cId': clusterId,
           },
-          ProjectionExpression: 'nodeId, lastSeen, runningVersion',
+          ProjectionExpression: 'nodeId, lastSeen, runningVersion, #r',
+          ExpressionAttributeNames: {'#r': 'roles'},
           Limit: 20,
         }, (err, resp) => {
           if (err) {
             return callback(err);
           }
+          const nodes = resp.Items;
+
+          nodes.forEach((node) => {
+            if (node.roles) {
+              node.roles = Object.keys(node.roles.contents);
+            } else {
+              node.roles = [];
+            }
+          });
 
           dynamo.getItem({
             TableName: 'Uber_Clusters',
@@ -71,11 +85,15 @@ exports.handler = (event, context, callback) => {
               return callback(err);
             }
             const cluster = clusterResp.Item;
-            cluster.apps = Object.keys(cluster.apps.contents);
+            if (cluster.apps) {
+              cluster.apps = Object.keys(cluster.apps.contents);
+            } else {
+              cluster.apps = [];
+            }
 
             callback(null, {
               cluster: cluster,
-              nodes: resp.Items,
+              nodes: nodes,
             });
           });
         });
@@ -110,7 +128,11 @@ exports.handler = (event, context, callback) => {
           return callback(err);
         }
         const cluster = clusterResp.Item;
-        cluster.apps = Object.keys(cluster.apps.contents);
+        if (cluster.apps) {
+          cluster.apps = Object.keys(cluster.apps.contents);
+        } else {
+          cluster.apps = [];
+        }
 
         genUUID((err, nodeId) => {
           genUUID((err, secret) => {
@@ -130,23 +152,28 @@ exports.handler = (event, context, callback) => {
                 return callback(err);
               }
 
+              let newNode = {
+                clusterId: cluster.clusterId,
+                nodeId: nodeId,
+                runningVersion: nodeVersion,
+                initialMetadata: {
+                  nodeVersion: nodeVersion,
+                  inviteId: inviteId,
+                  ipAddress: event.context['source-ip'],
+                  userAgent: event.context['user-agent'],
+                  apiKey: event.context['api-key'],
+                },
+                secret: secret,
+                firstSeen: new Date().toJSON(),
+                lastSeen: new Date().toJSON(),
+              };
+              if (roles.length) {
+                newNode.roles = dynamo.Set(roles, 'S');
+              }
+
               dynamo.putItem({
                 TableName: 'Uber_Nodes',
-                Item: {
-                  clusterId: cluster.clusterId,
-                  nodeId: nodeId,
-                  runningVersion: nodeVersion,
-                  initialMetadata: {
-                    nodeVersion: nodeVersion,
-                    inviteId: inviteId,
-                    ipAddress: event.context['source-ip'],
-                    userAgent: event.context['user-agent'],
-                    apiKey: event.context['api-key'],
-                  },
-                  secret: secret,
-                  firstSeen: new Date().toJSON(),
-                  lastSeen: new Date().toJSON(),
-                },
+                Item: newNode,
                 ConditionExpression: 'attribute_not_exists(nodeId)',
               }, (err) => {
                 if (err) {
@@ -155,22 +182,33 @@ exports.handler = (event, context, callback) => {
 
                 dynamo.query({
                   TableName: 'Uber_Nodes',
-                  KeyConditions: {
-                    clusterId: cluster.clusterId,
+                  KeyConditionExpression: 'clusterId = :cId',
+                  ExpressionAttributeValues: {
+                    ':cId': cluster.clusterId,
                   },
-                  ProjectionExpression: 'nodeId, lastSeen, runningVersion',
+                  ProjectionExpression: 'nodeId, lastSeen, runningVersion, #r',
+                  ExpressionAttributeNames: {'#r': 'roles'},
                   Limit: 20,
                 }, (err, resp) => {
                   if (err) {
                     return callback(err);
                   }
+                  const nodes = resp.Items;
+
+                  nodes.forEach((node) => {
+                    if (node.roles) {
+                      node.roles = Object.keys(node.roles.contents);
+                    } else {
+                      node.roles = [];
+                    }
+                  });
 
                   callback(null, {
                     cluster: cluster,
                     nodeId: nodeId,
                     secret: secret,
                     inviteId: inviteId,
-                    nodes: resp.Items,
+                    nodes: nodes,
                   });
                 });
               });

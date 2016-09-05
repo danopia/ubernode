@@ -12,43 +12,44 @@ if ('serviceWorker' in navigator) {
  });
 }
 
-const apiHost = 'https://vhihtfwmw3.execute-api.us-west-2.amazonaws.com/prod';
-joinCluster = (opts) => {
-  return fetch(apiHost + '/register', {
-    method: 'POST',
-    body: JSON.stringify(opts),
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': '2ZE8JHg2MS1EyaZthBBZ93XGr8EK3ljt39UTTwm2',
-    },
-    mode: 'cors',
-    cache: 'no-cache',
-  }).then((response) => {
-    return response.json();
-  });
-};
+let version = 'uber/p1';
+let roles = ['web', 'screen', 'input', 'mesh'];
 
+function log(message) {
+  return function (item) {
+    console.log(message, item);
+    return item;
+  };
+}
 
+function storeCoordinates(coords) {
+  localStorage.clusterId = coords.cluster.clusterId;
+  localStorage.nodeId = coords.nodeId;
+  localStorage.secret = coords.secret;
+  localStorage.inviteId = coords.inviteId;
+  return coords;
+}
+
+var registration;
 if (localStorage.nodeId) {
-  joinCluster({
+  registration = UberNet.register({
     clusterId: localStorage.clusterId,
     nodeId: localStorage.nodeId,
     secret: localStorage.secret,
-    nodeVersion: 'uber/0',
-  }).then((info) => {
-    console.log('Rejoined cluster.', info);
-  });
+    nodeVersion: version,
+    roles: roles,
+  }).then(log('Rejoined cluster.'));
 
 } else {
-  joinCluster({
+  registration = UberNet.register({
+    // TODO
     inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
-    nodeVersion: 'uber/0',
-  }).then((info) => {
-    console.log('Joined cluster.', info);
-
-    localStorage.clusterId = info.clusterId;
-    localStorage.nodeId = info.nodeId;
-    localStorage.secret = info.secret;
-    localStorage.inviteId = info.inviteId;
-  })
+    nodeVersion: version,
+    roles: roles,
+  }).then(log('Redeemed invite for cluster.'))
+    .then(storeCoordinates);
 }
+
+registration
+  .then(Cluster.construct)
+  .then(seedGrid);
