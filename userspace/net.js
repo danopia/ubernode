@@ -1,5 +1,6 @@
 window.UberNet = {};
-UberNet.rootUrl = 'https://vhihtfwmw3.execute-api.us-west-2.amazonaws.com/prod';
+// UberNet.rootUrl = 'https://vhihtfwmw3.execute-api.us-west-2.amazonaws.com/dev';
+UberNet.rootUrl = 'https://ubernet.danopia.net'; // prod
 UberNet.apiKey = '2ZE8JHg2MS1EyaZthBBZ93XGr8EK3ljt39UTTwm2';
 
 UberNet.register = (opts) => {
