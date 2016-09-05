@@ -63,6 +63,13 @@ class Cluster {
     this.nodes[node.id] = node;
   }
 
+  eachNode(cb) {
+    Object.keys(this.nodes)
+      .map((key) => {
+        return this.nodes[key];
+      }).forEach(cb);
+  }
+
   searchForRole(role) {
     return Object.keys(this.nodes)
       .map((key) => {
@@ -79,5 +86,6 @@ Cluster.construct = (payload) => {
   payload.nodes.forEach((node) => {
     cluster.addNode(new Node(node, payload.cluster.clusterId));
   });
+  UberUI.render();
   return cluster;
 };

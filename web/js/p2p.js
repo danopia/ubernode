@@ -102,6 +102,7 @@ function seedGrid(cluster) {
       var node = LocalCluster.nodes[userId];
       if (node) {
         node.channel = channel;
+        UberUI.render();
       }
     };
 
@@ -110,6 +111,12 @@ function seedGrid(cluster) {
       if (userId == seed.id) {
         // TODO: reconnect to seed if we lost the cluster
         location.reload();
+      }
+
+      var node = LocalCluster.nodes[userId];
+      if (node) {
+        node.channel = null;
+        UberUI.render();
       }
     };
 

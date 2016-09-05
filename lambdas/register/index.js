@@ -30,9 +30,12 @@ exports.handler = (event, context, callback) => {
         return callback(err);
       }
       const node = nodeResp.Item;
+      if (!node) {
+        return callback(new Error('Node not found'));
+      }
 
       if (node.secret !== secret) {
-        throw new Error('Incorrect secret for node');
+        return callback(new Error('Incorrect secret for node'));
       }
 
       // TODO: use updateItem
