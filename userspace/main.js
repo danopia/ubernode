@@ -43,6 +43,12 @@ if (localStorage.nodeId) {
     secret: localStorage.secret,
     nodeVersion: version,
     roles: roles,
+  }).then((obj) => {
+    if (obj.errorMessage == 'Node not found') {
+      localStorage.clear();
+      location.reload();
+    }
+    return obj;
   }).then(log('Rejoined cluster.'));
 
 } else {
