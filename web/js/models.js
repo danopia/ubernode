@@ -26,6 +26,18 @@ class Node {
   cluster() {
     return Clusters[this.clusterId];
   }
+
+  hasRole(role) {
+    return this.metadata.roles.includes(role);
+  }
+
+  send(data) {
+    if (this.channel) {
+      this.channel.send(JSON.stringify(data));
+    } else {
+      console.log("Can't talk to", this, "- no channel");
+    }
+  }
 }
 
 class Cluster {
@@ -49,6 +61,16 @@ class Cluster {
 
   addNode(node) {
     this.nodes[node.id] = node;
+  }
+
+  searchForRole(role) {
+    return Object.keys(this.nodes)
+      .map((key) => {
+        return this.nodes[key];
+      })
+      .filter((node) => {
+        return node.hasRole(role);
+      });
   }
 }
 

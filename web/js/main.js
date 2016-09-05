@@ -13,7 +13,12 @@ if ('serviceWorker' in navigator) {
 }
 
 let version = 'uber/p1';
-let roles = ['web', 'screen', 'input', 'mesh'];
+// let roles = ['web', 'screen', 'input', 'mesh'];
+let roles = ['p2p'];
+
+if (localStorage.isMaster) {
+  roles.push('seed'); // advertise as a P2P seed
+}
 
 function log(message) {
   return function (item) {
