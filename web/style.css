@@ -13,8 +13,11 @@ body {
 
 #loading-icon {
   display: block;
-  margin: -200px auto -50px;
-}
+  margin: -200px 50% -50px;
+  position: relative;
+  left: -318px;
+  z-index: -5;
+} /* 636x400 */
 
 h1 {
   text-align: center;
