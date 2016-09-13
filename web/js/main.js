@@ -36,34 +36,40 @@ function storeCoordinates(coords) {
   return coords;
 }
 
-var registration;
-if (localStorage.nodeId) {
-  UberUI.setStatus('Registering node');
-  registration = UberNet.register({
-    clusterId: localStorage.clusterId,
-    nodeId: localStorage.nodeId,
-    secret: localStorage.secret,
-    nodeVersion: version,
-    roles: roles,
-  }).then((obj) => {
-    if (obj.errorMessage == 'Node not found') {
+spawnP(function* () {
+  var registration;
+
+  if (localStorage.nodeId) {
+    UberUI.setStatus('Registering node');
+    registration = yield UberNet.register({
+      clusterId: localStorage.clusterId,
+      nodeId: localStorage.nodeId,
+      secret: localStorage.secret,
+      nodeVersion: version,
+      roles: roles,
+    });
+
+    if (registration.errorMessage == 'Node not found') {
       localStorage.clear();
       location.reload();
     }
-    return obj;
-  }).then(log('Rejoined cluster.'));
+    console.log('Rejoined cluster.');
 
-} else {
-  UberUI.setStatus('Redeeming ticket');
-  registration = UberNet.register({
-    // TODO
-    inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
-    nodeVersion: version,
-    roles: roles,
-  }).then(log('Redeemed invite for cluster.'))
-    .then(storeCoordinates);
-}
+  } else {
+    UberUI.setStatus('Redeeming ticket');
+    registration = yield UberNet.register({
+      // TODO
+      inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
+      nodeVersion: version,
+      roles: roles,
+    });
+    
+    console.log('Redeemed invite for cluster.');
+    storeCoordinates(registration);
+  }
 
-registration
-  .then(Cluster.construct)
-  .then(seedGrid);
+  var cluster = yield Cluster.construct(registration);
+  var grid = yield seedGrid(cluster);
+
+  UberUI.setStatus('Completed startup');
+});
