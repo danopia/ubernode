@@ -104,6 +104,10 @@ function seedGrid(cluster) {
         node.channel = channel;
         UberUI.render();
       }
+
+      if (userId == seed.id) {
+        UberUI.setStatus('Connected to seed');
+      }
     };
 
     datachannel.onleave = function (userId) {

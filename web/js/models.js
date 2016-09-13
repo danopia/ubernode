@@ -52,6 +52,7 @@ class Cluster {
     Clusters[this.id] = this;
     if (this.isSelf()) {
       LocalCluster = this;
+      UberUI.setStatus('Reconstructed neighbor listing');
     }
   }
 

@@ -28,6 +28,7 @@ function log(message) {
 }
 
 function storeCoordinates(coords) {
+  UberUI.setStatus('Received registration');
   localStorage.clusterId = coords.cluster.clusterId;
   localStorage.nodeId = coords.nodeId;
   localStorage.secret = coords.secret;
@@ -37,6 +38,7 @@ function storeCoordinates(coords) {
 
 var registration;
 if (localStorage.nodeId) {
+  UberUI.setStatus('Registering node');
   registration = UberNet.register({
     clusterId: localStorage.clusterId,
     nodeId: localStorage.nodeId,
@@ -52,6 +54,7 @@ if (localStorage.nodeId) {
   }).then(log('Rejoined cluster.'));
 
 } else {
+  UberUI.setStatus('Redeeming ticket');
   registration = UberNet.register({
     // TODO
     inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',

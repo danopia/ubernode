@@ -1,12 +1,22 @@
 window.UberUI = {
   target: document.body.querySelector('#render-target'),
+  status: 'Loading',
+
+  setStatus(status) {
+    console.log('New status:', status);
+    this.status = status;
+    this.render();
+  },
 
   render() {
     var children = [];
-    console.log('Rendering', LocalCluster);
+    console.log('Rendering');
+
+    children.push('<img src="/blob/geometric.gif" id="loading-icon">');
+    children.push('<h1>', this.status, '...', '</h1>');
 
     if (LocalCluster) {
-      children.push('<h1>', LocalCluster.name, '</h1>');
+      children.push('<h3>', LocalCluster.name, '</h3>');
       children.push('<p>Associated P2P nodes:</p>')
       children.push('<ul>');
       LocalCluster.eachNode((node) => {
@@ -32,7 +42,7 @@ window.UberUI = {
     }
 
     this.target.innerHTML = children.join('');
-  }
+  },
 };
 
 UberUI.render();

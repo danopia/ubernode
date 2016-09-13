@@ -1,0 +1,22 @@
+body {
+  background-color: #262626;
+  font-family: Arial, sans-serif;
+  color: #eee;
+}
+
+#render-target {
+  position: absolute;
+  left: 1em;
+  right: 1em;
+  top: 40%;
+}
+
+#loading-icon {
+  display: block;
+  margin: -200px auto -50px;
+}
+
+h1 {
+  text-align: center;
+  text-transform: lowercase;
+}
