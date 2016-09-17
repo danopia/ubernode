@@ -1,3 +1,6 @@
+var UI = yield require('ui.js');
+var Net = yield require('net.js');
+
 var pusherSetup = new Promise((resolve, reject) => {
   // Enable pusher logging - don't include this in production
   Pusher.logToConsole = false;
@@ -22,7 +25,7 @@ var pusherSetup = new Promise((resolve, reject) => {
   // TODO: fail after timeout
 });
 
-function seedGrid(cluster) {
+exports.seedGrid = (cluster) => {
   // var channelId = 'cluster_' + cluster.id;
 
   // Initialise DataChannel.js
@@ -44,7 +47,7 @@ function seedGrid(cluster) {
       var socket = {
         channel: channel,
         send: function(message) {
-          UberNet.beacon({
+          Net.beacon({
             target: channel,
             socketId: pusher.connection.socket_id,
             nodeId: localStorage.nodeId,
@@ -102,11 +105,11 @@ function seedGrid(cluster) {
       var node = LocalCluster.nodes[userId];
       if (node) {
         node.channel = channel;
-        UberUI.render();
+        UI.render();
       }
 
       if (userId == seed.id) {
-        UberUI.setStatus('Connected to seed');
+        UI.setStatus('Connected to seed');
       }
     };
 
@@ -120,7 +123,7 @@ function seedGrid(cluster) {
       var node = LocalCluster.nodes[userId];
       if (node) {
         node.channel = null;
-        UberUI.render();
+        UI.render();
       }
     };
 
@@ -140,4 +143,4 @@ function seedGrid(cluster) {
     cluster.channel = datachannel;
     return cluster;
   });
-}
+};
