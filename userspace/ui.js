@@ -1,6 +1,6 @@
-window.UberUI = {
+var UI = self.exports = {
   target: document.body.querySelector('#render-target'),
-  status: 'Loading',
+  status: 'Waiting for first script',
 
   setStatus(status) {
     console.log('New status:', status);
@@ -15,7 +15,7 @@ window.UberUI = {
     children.push('<img src="/blob/geometric.gif" id="loading-icon">');
     children.push('<h1>', this.status, '...', '</h1>');
 
-    if (LocalCluster) {
+    if (window.LocalCluster) {
       children.push('<h3>', LocalCluster.name, '</h3>');
       children.push('<p>Associated P2P nodes:</p>')
       children.push('<ul>');
@@ -38,11 +38,11 @@ window.UberUI = {
       });
       children.push('</ul>');
     } else {
-      children.push('<h3>Connecting...</h3>');
+      children.push('<h3>Waiting for cluster...</h3>');
     }
 
     this.target.innerHTML = children.join('');
   },
 };
 
-UberUI.render();
+UI.render();

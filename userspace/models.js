@@ -2,6 +2,8 @@ window.Clusters = {};
 window.LocalCluster = null;
 window.LocalNode = null;
 
+var UI = yield require('ui.js');
+
 class Node {
   constructor(metadata, clusterId) {
     // lastSeen, nodeId, roles, runningVersion
@@ -52,7 +54,7 @@ class Cluster {
     Clusters[this.id] = this;
     if (this.isSelf()) {
       LocalCluster = this;
-      UberUI.setStatus('Reconstructed neighbor listing');
+      UI.setStatus('Reconstructed neighbor listing');
     }
   }
 
@@ -82,11 +84,14 @@ class Cluster {
   }
 }
 
+exports.Node = Node;
+exports.Cluster = Cluster;
+
 Cluster.construct = (payload) => {
   var cluster = new Cluster(payload.cluster);
   payload.nodes.forEach((node) => {
     cluster.addNode(new Node(node, payload.cluster.clusterId));
   });
-  UberUI.render();
+  UI.render();
   return cluster;
 };

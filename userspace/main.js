@@ -1,3 +1,4 @@
+/*
 if (!window.indexedDB) {
     window.alert("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
 }
@@ -11,6 +12,15 @@ if ('serviceWorker' in navigator) {
    console.log(':^(', err);
  });
 }
+*/
+
+// preload everything
+yield require(['models.js', 'net.js', 'p2p.js']);
+
+var {Node, Cluster} = yield require('models.js');
+var Net = yield require('net.js');
+var P2P = yield require('p2p.js');
+var UI = yield require('ui.js');
 
 let version = 'uber/p1';
 // let roles = ['web', 'screen', 'input', 'mesh'];
@@ -28,7 +38,7 @@ function log(message) {
 }
 
 function storeCoordinates(coords) {
-  UberUI.setStatus('Received registration');
+  UI.setStatus('Received registration');
   localStorage.clusterId = coords.cluster.clusterId;
   localStorage.nodeId = coords.nodeId;
   localStorage.secret = coords.secret;
@@ -40,8 +50,8 @@ spawnP(function* () {
   var registration;
 
   if (localStorage.nodeId) {
-    UberUI.setStatus('Registering node');
-    registration = yield UberNet.register({
+    UI.setStatus('Registering node');
+    registration = yield Net.register({
       clusterId: localStorage.clusterId,
       nodeId: localStorage.nodeId,
       secret: localStorage.secret,
@@ -56,20 +66,20 @@ spawnP(function* () {
     console.log('Rejoined cluster.');
 
   } else {
-    UberUI.setStatus('Redeeming ticket');
-    registration = yield UberNet.register({
+    UI.setStatus('Redeeming ticket');
+    registration = yield Net.register({
       // TODO
       inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
       nodeVersion: version,
       roles: roles,
     });
-    
+
     console.log('Redeemed invite for cluster.');
     storeCoordinates(registration);
   }
 
   var cluster = yield Cluster.construct(registration);
-  var grid = yield seedGrid(cluster);
+  var grid = yield P2P.seedGrid(cluster);
 
-  UberUI.setStatus('Completed startup');
+  UI.setStatus('Completed startup');
 });
