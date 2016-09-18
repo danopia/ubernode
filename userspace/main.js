@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator) {
 }
 */
 
-// preload everything
+// preload some stuff
 yield require(['models.js', 'net.js', 'p2p.js']);
 
 var {Node, Cluster} = yield require('models.js');
@@ -79,7 +79,7 @@ spawnP(function* () {
   }
 
   var cluster = yield Cluster.construct(registration);
-  var grid = yield P2P.seedGrid(cluster);
+  // var grid = yield P2P.seedGrid(cluster);
 
   UI.setStatus('Completed startup');
 });
