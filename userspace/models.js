@@ -2,15 +2,15 @@ window.Clusters = {};
 window.LocalCluster = null;
 window.LocalNode = null;
 
-var UI = yield require('ui.js');
+// var UI = yield require('ui.js');
 
 class Node {
-  constructor(metadata, clusterId) {
+  constructor(metadata) {
     // lastSeen, nodeId, roles, runningVersion
     this.metadata = metadata;
 
     this.id = metadata.nodeId;
-    this.clusterId = clusterId || metadata.clusterId;
+    this.clusterId = metadata.clusterId;
 
     if (this.isSelf()) {
       LocalNode = this;
@@ -54,7 +54,7 @@ class Cluster {
     Clusters[this.id] = this;
     if (this.isSelf()) {
       LocalCluster = this;
-      UI.setStatus('Reconstructed neighbor listing');
+      // UI.setStatus('Reconstructed neighbor listing');
     }
   }
 
@@ -87,6 +87,28 @@ class Cluster {
 exports.Node = Node;
 exports.Cluster = Cluster;
 
+
+var {DocumentStore} = yield require('data/document-store.js');
+
+window.ClusterStore = new DocumentStore({
+  tableName: 'ClusterStore',
+  inflater: Cluster,
+
+  hashKey: 'clusterId',
+  hashKeyType: String,
+});
+
+window.NodeStore = new DocumentStore({
+  tableName: 'NodeStore',
+  inflater: Node,
+
+  hashKey: 'clusterId',
+  hashKeyType: String,
+  sortKey: 'nodeId',
+  sortKeyType: String,
+});
+
+/*
 Cluster.construct = (payload) => {
   var cluster = new Cluster(payload.cluster);
   payload.nodes.forEach((node) => {
@@ -95,3 +117,4 @@ Cluster.construct = (payload) => {
   UI.render();
   return cluster;
 };
+*/
