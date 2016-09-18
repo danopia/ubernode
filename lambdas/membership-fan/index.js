@@ -15,12 +15,23 @@ exports.handler = (event, context, callback) => {
   event.Records.forEach((record) => {
     if (record.eventName == 'INSERT') {
       var entry = record.dynamodb.NewImage; // also SequenceNumber
+      var doc = collapseTypes(entry);
 
+      console.log('Pushing log entry', doc);
       pusher.trigger(
-        'cluster_' + entry.clusterId.S,
+        'cluster_' + doc.clusterId,
         'membership-log',
-        entry);
+        doc);
     }
   });
   callback(null, `Successfully processed ${event.Records.length} records.`);
 };
+
+function collapseTypes(doc) {
+  let cleanDoc = {};
+  Object.keys(doc).forEach(key => {
+    let typeKey = Object.keys(doc[key])[0];
+    cleanDoc[key] = doc[key][typeKey];
+  });
+  return cleanDoc;
+}

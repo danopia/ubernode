@@ -28,6 +28,7 @@ exports.DocumentStore = class DocumentStore {
     if (!doc || doc.constructor !== Object) {
       throw new Error(`Document to put must be present and an Object`);
     }
+    doc = JSON.parse(JSON.stringify(doc));
 
     if (this.sortKey) {
       let sortBucket = this.hashBucket.getItem(doc[this.hashKey]);

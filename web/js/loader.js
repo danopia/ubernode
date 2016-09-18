@@ -14,7 +14,7 @@ function require(path) {
     exports: {},
   };
 
-  return module.promise = fetch('js/' + path)
+  return module.promise = fetch('js/' + path, {cache: 'no-store'})
     .then((response) => {
       if (response.ok) {
         return response.text();

@@ -21,7 +21,7 @@ exports.HashBucket = class HashBucket {
     let items = [];
     for (let item of this.map.values()) {
       items.push(item);
-    });
+    }
     return items;
   }
 
