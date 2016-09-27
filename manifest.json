@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "Überdorf Node",
+  "short_name": "Überdorf",
+  "description": "",
+  "version": "0.0.1",
+  "minimum_chrome_version": "38",
+
+  "icons": {
+    "16": "assets/icon_16.png",
+    "128": "assets/icon_128.png"
+  },
+  
+  "permissions": [
+    "storage"
+  ],
+
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+
+  "sandbox": {
+    "pages": ["userspace.html"]
+  }
+  
+}

@@ -18,11 +18,11 @@ class Node {
   }
 
   isSelf() {
-    return this.id == localStorage.nodeId;
+    return this.id == MEMBERSHIP.nodeId;
   }
 
   isInCluster() {
-    return this.clusterId == localStorage.clusterId;
+    return this.clusterId == MEMBERSHIP.clusterId;
   }
 
   cluster() {
@@ -59,7 +59,7 @@ class Cluster {
   }
 
   isSelf() {
-    return this.id == localStorage.clusterId;
+    return this.id == MEMBERSHIP.clusterId;
   }
 
   addNode(node) {

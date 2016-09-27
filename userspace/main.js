@@ -21,30 +21,30 @@ let version = 'uber/p1';
 // let roles = ['web', 'screen', 'input', 'mesh'];
 let roles = ['p2p'];
 
-if (localStorage.isMaster) {
+let isMaster = yield SYSCALL('persist/read', {key: 'is-master'});
+if (isMaster) {
   roles.push('seed'); // advertise as a P2P seed
 }
 
-spawnP(function* () {
-  if (localStorage.nodeId) {
-    window.membership = yield resumeSession({
-      nodeVersion: version,
-      roles: roles,
-    });
+let membershipCard = yield SYSCALL('persist/read', {key: 'membership-card'});
+if (membershipCard && membershipCard.clusterId) {
+  var membership = yield resumeSession({
+    nodeVersion: version,
+    roles: roles,
+  }, membershipCard);
 
-  } else {
-    window.membership = yield redeemInvite({
-      // TODO
-      inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
-      nodeVersion: version,
-      roles: roles,
-    });
-  }
+} else {
+  var membership = yield redeemInvite({
+    // TODO
+    inviteId: '3010e176-b20f-4630-9f77-9a904bbf2587',
+    nodeVersion: version,
+    roles: roles,
+  });
+}
 
-  yield membership.bindUberNet();
+yield membership.bindUberNet();
 
-  // var cluster = yield Cluster.construct(registration);
-  // var grid = yield P2P.seedGrid(cluster);
+// var cluster = yield Cluster.construct(registration);
+// var grid = yield P2P.seedGrid(cluster);
 
-  // UI.setStatus('Completed startup');
-});
+// UI.setStatus('Completed startup');

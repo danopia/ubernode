@@ -19,7 +19,7 @@ exports.seedGrid = (cluster) => {
 
       // Subscribe to Pusher signalling channel
       var pusherChannel = pusher.subscribe(channel);
-      console.log('Subscribed to', channel, 'on pusher')
+      console.log('Subscribed to', channel, 'on pusher');
 
       var socket = {
         channel: channel,
@@ -27,8 +27,8 @@ exports.seedGrid = (cluster) => {
           Net.beacon({
             target: channel,
             socketId: pusher.connection.socket_id,
-            nodeId: localStorage.nodeId,
-            secret: localStorage.secret,
+            nodeId: MEMBERSHIP.nodeId,
+            secret: MEMBERSHIP.secret,
             message: message,
           }).then((data) => {
             xhrErrorCount = 0;
@@ -67,9 +67,11 @@ exports.seedGrid = (cluster) => {
       if (!seed) {
         // No seed yet, reload as one
         // TODO: reloading is janky
-        localStorage.isMaster = true;
-        console.log('Making us a seed')
-        location.reload();
+        console.log('Making us a seed');
+        SYSCALL('persist/write', {
+          key: 'is-master',
+          value: true
+        }).then(() => location.reload());
       }
 
       console.log('Using', seed, 'as seed');

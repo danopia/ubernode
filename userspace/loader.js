@@ -8,20 +8,14 @@ function require(path) {
   if (path in moduleCache) {
     return moduleCache[path].promise;
   }
+  //console.group('Loading', path);
 
   var module = moduleCache[path] = {
-    path: 'js/' + path,
+    path: 'userspace/' + path,
     exports: {},
   };
 
-  return module.promise = fetch('js/' + path, {cache: 'no-store'})
-    .then((response) => {
-      if (response.ok) {
-        return response.text();
-      } else {
-        throw new Error('HTTP error loading js/' + path);
-      }
-    })
+  module.promise = SYSCALL('read-file', {path: 'userspace/' + path})
     .then((source) => {
       module.source = source;
       module.factory = eval([
@@ -33,6 +27,12 @@ function require(path) {
         module, module.exports, require);
 
       return spawnP(inflate);
+        /*.then(x => {
+          console.groupEnd();
+          return x;
+        });*/
     }).then(() => module.exports);
+  return module.promise;
 }
+
 require('main.js');
